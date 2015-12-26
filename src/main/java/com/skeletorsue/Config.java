@@ -23,6 +23,7 @@ public class Config {
 	public Ini Raw;
 	public Ini.Section Credentials;
 	public List<Bucket> Buckets = new ArrayList();
+	public Integer NumThreads;
 
 	public Config(String[] args) throws IOException, SQLException {
 
@@ -48,9 +49,9 @@ public class Config {
 	private void BuildConfig() throws IOException, SQLException {
 		this.Raw = new Ini(ConfigFile);
 		this.Credentials = this.Raw.get("credentials");
+		this.NumThreads = Parser.get(this.Raw.get("general", "num-threads"), 1);
 
-		for (String Key : this.Raw.get("buckets").keySet())
-		{
+		for (String Key : this.Raw.get("buckets").keySet()) {
 			Buckets.add(new Bucket(Key, this.Raw.get("buckets", Key)));
 		}
 	}

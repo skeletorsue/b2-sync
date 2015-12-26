@@ -5,20 +5,24 @@ import java.io.IOException;
 public class Sync {
 
 	public static Output ob;
+	public static Config Config;
 	private static Integer ExitCode = 0;
 
 	public static void main(String[] args) {
 		ob = new Output();
 
 		try {
-			Config config = LoadConfig(args);
+
+			Config = LoadConfig(args);
 
 			Stopwatch timer = StartStep("Sync");
 
 			// loop through our found buckets, and do things with them
-			for (Integer i = 0; i < config.Buckets.size(); i++) {
-				Bucket b = config.Buckets.get(i);
-				ob.print(b.Directory);
+			for (Integer i = 0; i < Config.Buckets.size(); i++) {
+				Bucket b = Config.Buckets.get(i);
+				Integer startLine = ob.print("Processing: " + b.Directory);
+				b.Process(i);
+				ob.TrimScreen(startLine);
 			}
 
 			StopStep(timer, "Sync");

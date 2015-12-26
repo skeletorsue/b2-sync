@@ -3,7 +3,6 @@ package com.skeletorsue;
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.TerminalSize;
-import sun.security.krb5.internal.LastReq;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +37,8 @@ public class Output {
 		terminal().exitPrivateMode();
 		terminal().setCursorVisible(true);
 		for (Integer i = 0; i < this.Screen.size(); i++) {
-			System.out.println(this.Screen.get(i));
+			if (i < LastLine)
+				System.out.println(this.Screen.get(i));
 		}
 		LastLine = 0;
 		this.Screen.clear();
@@ -63,6 +63,7 @@ public class Output {
 			message += " ";
 		this.terminal().moveCursor(col, row);
 		for (char r : message.toCharArray()) {
+			this.terminal().moveCursor(col++, row);
 			this.terminal().putCharacter(r);
 		}
 		this.terminal().moveCursor(this.Width(), this.Height());
@@ -85,6 +86,15 @@ public class Output {
 		System.out.println("");
 		System.out.println("");
 		setUp();
+	}
+
+	public void TrimScreen(Integer after) throws IOException {
+		for (Integer i = (this.Screen.size() - 1); i > after; i--) {
+			this.Screen.remove(i);
+			print(i, "");
+		}
+
+		this.LastLine = (after + 1);
 	}
 
 	public TerminalSize Size() throws IOException {
