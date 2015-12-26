@@ -11,14 +11,17 @@ public class Sync {
 		ob = new Output();
 
 		try {
-			ob.print("Hello World");
 			Config config = LoadConfig(args);
 
-			
+			Stopwatch timer = StartStep("Sync");
+
+			// loop through our found buckets, and do things with them
 			for (Integer i = 0; i < config.Buckets.size(); i++) {
-				ob.print(config.Buckets.get(i).Directory);
+				Bucket b = config.Buckets.get(i);
+				ob.print(b.Directory);
 			}
 
+			StopStep(timer, "Sync");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ExitCode = 1;
@@ -33,12 +36,30 @@ public class Sync {
 	}
 
 	public static Config LoadConfig(String[] args) throws Exception {
-		Stopwatch timer = new Stopwatch();
-		ob.print("Loading config.ini - READING");
+		Stopwatch timer = StartStep("Config Loading");
 		Config config = new Config(args);
-		ob.print("Loading config.ini - LOADED " + timer.RunTime(3) + "s");
+		StopStep(timer, "Config Loading");
 
 		return config;
+	}
+
+	public static Stopwatch StartStep(String Step) throws IOException {
+		ob.print("########################################################");
+		ob.print("### Starting " + Step + " Process");
+		ob.print("########################################################");
+		return new Stopwatch();
+	}
+
+	public static void StopStep(Stopwatch timer, String Step) throws IOException {
+		ob.print("########################################################");
+		ob.print("### Finished " + Step + " Process (" + timer.RunTime(3) + ")");
+		ob.print("########################################################");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		ob.ClearScreen();
 	}
 
 }

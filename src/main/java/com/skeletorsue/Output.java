@@ -34,11 +34,14 @@ public class Output {
 	}
 
 	public void tearDown() throws IOException {
+		terminal().clearScreen();
 		terminal().exitPrivateMode();
 		terminal().setCursorVisible(true);
 		for (Integer i = 0; i < this.Screen.size(); i++) {
 			System.out.println(this.Screen.get(i));
 		}
+		LastLine = 0;
+		this.Screen.clear();
 	}
 
 	public Integer print(String message) throws IOException {
@@ -75,6 +78,13 @@ public class Output {
 		}
 
 		this.Screen.set(row, message);
+	}
+
+	public void ClearScreen() throws IOException {
+		tearDown();
+		System.out.println("");
+		System.out.println("");
+		setUp();
 	}
 
 	public TerminalSize Size() throws IOException {
