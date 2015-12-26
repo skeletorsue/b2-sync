@@ -31,8 +31,8 @@ public class Sync {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.exit(ExitCode);
 		}
+		System.exit(ExitCode);
 	}
 
 	public static Config LoadConfig(String[] args) throws Exception {
