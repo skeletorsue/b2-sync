@@ -13,6 +13,7 @@ public class Output {
 	private TerminalSize size;
 	private List<String> Screen = new ArrayList();
 	private Integer LastLine = 0;
+	private Boolean Lock = false;
 
 	public Terminal terminal() throws IOException {
 
@@ -61,12 +62,24 @@ public class Output {
 		StoreOutput(col, row, message);
 		while ((message.length() + col) < Width())
 			message += " ";
-		this.terminal().moveCursor(col, row);
-		for (char r : message.toCharArray()) {
-			this.terminal().moveCursor(col++, row);
-			this.terminal().putCharacter(r);
+		while (Lock) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				//
+			}
 		}
-		this.terminal().moveCursor(this.Width(), this.Height());
+		
+		Lock = true;
+		try {
+			this.terminal().moveCursor(col, row);
+			for (char r : message.toCharArray()) {
+				this.terminal().putCharacter(r);
+			}
+			this.terminal().moveCursor(this.Width(), this.Height());
+		} finally {
+			Lock = false;
+		}
 	}
 
 	private void StoreOutput(Integer col, Integer row, String message) {
