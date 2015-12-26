@@ -11,12 +11,10 @@ public class Sync {
 		ob = new Output();
 
 		try {
-
 			ob.print("Hello World");
-
-			// above me is just a test
 			Config config = LoadConfig(args);
 
+			
 			for (Integer i = 0; i < config.Buckets.size(); i++) {
 				ob.print(config.Buckets.get(i).Directory);
 			}
