@@ -51,6 +51,11 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.8.11.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.lanterna</groupId>
+            <artifactId>lanterna</artifactId>
+            <version>2.1.9</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>com.skeletorsue</groupId>-->
             <!--<artifactId>Database</artifactId>-->

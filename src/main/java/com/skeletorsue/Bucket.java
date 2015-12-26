@@ -1,6 +1,7 @@
 package com.skeletorsue;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class Bucket {
@@ -8,15 +9,16 @@ public class Bucket {
 	public Integer FileCount = 0;
 	public Database DB;
 
-	public Bucket(String name, String directory) throws SQLException {
-		System.out.print("Scanning " + directory);
+	public Bucket(String name, String directory) throws SQLException, IOException {
+		String message = "Scanning " + directory;
+		Integer line = Sync.ob.print(message);
 		this.Name = name;
 		this.Directory = directory;
 
 		Stopwatch time = new Stopwatch();
 		CountFiles(this.Directory);
 
-		System.out.println(" -- Found " + this.FileCount + " files in " + time.RunTime(2) + " Seconds");
+		Sync.ob.print(message.length(), line, " -- Found " + this.FileCount + " files in " + time.RunTime(2) + " Seconds");
 		this.DB = new Database();
 		this.DB.conn_info.Driver = "sqlite";
 		this.DB.conn_info.DriverClass = "org.sqlite.JDBC";
