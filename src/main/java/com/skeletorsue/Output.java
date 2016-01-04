@@ -64,16 +64,16 @@ public class Output {
 			message += " ";
 		while (Lock) {
 			try {
-				Thread.sleep(10);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				//
 			}
 		}
-		
+
 		Lock = true;
 		try {
-			this.terminal().moveCursor(col, row);
 			for (char r : message.toCharArray()) {
+				this.terminal().moveCursor(col++, row);
 				this.terminal().putCharacter(r);
 			}
 			this.terminal().moveCursor(this.Width(), this.Height());

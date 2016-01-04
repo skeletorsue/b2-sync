@@ -13,7 +13,6 @@ public class Bucket {
 	public Integer ProcessCount = 0;
 	public Database DB;
 	public List<String> Files = new ArrayList<>();
-	private List<Thread> Threads = new ArrayList<>();
 
 	public Bucket(String name, String directory) throws SQLException, IOException {
 		String message = "Scanning " + directory;
@@ -57,7 +56,8 @@ public class Bucket {
 	}
 
 	public void Process(Integer BucketID) throws IOException, InterruptedException {
-		Sync.ob.print("Spawning " + Sync.Config.NumThreads + " threads");
+		Integer startLine = Sync.ob.print("Processing: " + Directory);
+
 		Integer StartingThreads = Thread.activeCount();
 
 		for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
@@ -66,11 +66,12 @@ public class Bucket {
 		}
 
 		while (Thread.activeCount() > StartingThreads) {
-			Sync.ob.print("Active Threads: " + Thread.activeCount());
 			Thread.sleep(1000);
 		}
 
-		Sync.ob.print("Processed " + ProcessCount + " of " + FileCount + " files");
+		Sync.ob.print(startLine, Directory + " finished processing " + ProcessCount + " of " + FileCount + " files");
+
 		Thread.sleep(4000);
+		Sync.ob.TrimScreen(startLine);
 	}
 }

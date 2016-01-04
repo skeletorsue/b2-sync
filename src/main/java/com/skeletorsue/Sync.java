@@ -20,9 +20,7 @@ public class Sync {
 			// loop through our found buckets, and do things with them
 			for (Integer i = 0; i < Config.Buckets.size(); i++) {
 				Bucket b = Config.Buckets.get(i);
-				Integer startLine = ob.print("Processing: " + b.Directory);
 				b.Process(i);
-				ob.TrimScreen(startLine);
 			}
 
 			StopStep(timer, "Sync");
