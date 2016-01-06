@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class Bucket {
 	public String Name, Directory;
@@ -58,14 +60,24 @@ public class Bucket {
 	public void Process(Integer BucketID) throws IOException, InterruptedException {
 		Integer startLine = Sync.ob.print("Processing: " + Directory);
 
-		Integer StartingThreads = Thread.activeCount();
-
 		for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
 			Thread t = new Thread(new Uploader(this.DB, BucketID));
+			t.setName("SYNC_" + t.getId());
 			t.start();
 		}
 
-		while (Thread.activeCount() > StartingThreads) {
+		int SyncThreads = 999;
+		while (SyncThreads > 0) {
+			SyncThreads = 0;
+			ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
+			int noThreads = currentGroup.activeCount();
+			Thread[] lstThreads = new Thread[noThreads];
+			currentGroup.enumerate(lstThreads);
+			for (int i = 0; i < noThreads; i++) {
+				if (lstThreads[i].getName().length() > 5 && Objects.equals(lstThreads[i].getName().substring(0, 5), "SYNC_"))
+					SyncThreads++;
+			}
+
 			Thread.sleep(1000);
 		}
 
