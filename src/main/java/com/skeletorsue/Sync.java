@@ -54,7 +54,7 @@ public class Sync {
 
 	public static void StopStep(Stopwatch timer, String Step) throws IOException {
 		ob.print("########################################################");
-		ob.print("### Finished " + Step + " Process (" + timer.RunTime(3) + ")");
+		ob.print("### Finished " + Step + " Process (" + timer.RunTime(3) + " Seconds)");
 		ob.print("########################################################");
 		try {
 			Thread.sleep(1000);
