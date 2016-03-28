@@ -36,7 +36,8 @@ public class Uploader implements Runnable {
 				ResultSet result = PreparedStatement.executeQuery();
 
 				String StoredHash = "XXXX";
-				String FileHash = Hash.File("SHA-512", new File(Sync.Config.Buckets.get(BucketID).Directory + "/" + File));
+				File FileObject = new File(Sync.Config.Buckets.get(BucketID).Directory + "/" + File);
+				String FileHash = Hash.File("SHA-512", FileObject);
 
 				while (result.next()) {
 					StoredHash = result.getString("file_hash");
@@ -44,12 +45,13 @@ public class Uploader implements Runnable {
 
 				if (!Objects.equals(StoredHash, FileHash)) {
 					// doo the sync!
+
+					// insert into the db
 					String InsertStatement = "INSERT OR REPLACE INTO sync_hashes (name_hash, file_hash) VALUES (?, ?)";
 					PreparedStatement InsertQuery = this.db.prepare(InsertStatement);
 					InsertQuery.setString(1, NameHash);
 					InsertQuery.setString(2, FileHash);
 					InsertQuery.execute();
-					System.out.println(File + " Doing the sync");
 				}
 
 				Thread.sleep(ThreadLocalRandom.current().nextInt(10, 45)); // TODO remove this random sleep once we actually sync stuff

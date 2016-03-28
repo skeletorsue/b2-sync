@@ -59,6 +59,7 @@ public class Bucket {
 
 	public void Process(Integer BucketID) throws IOException, InterruptedException {
 		Integer startLine = Sync.ob.print("Processing: " + Directory);
+		B2.Authorize();
 
 		for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
 			Thread t = new Thread(new Uploader(this.DB, BucketID));
