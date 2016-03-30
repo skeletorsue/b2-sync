@@ -1,6 +1,6 @@
 package com.skeletorsue;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
@@ -92,7 +92,7 @@ public class B2 {
     private JSONObject GetAuthorization() throws IOException {
         if (Authorization == null) {
             HttpURLConnection connection = null;
-            String headerForAuthorizeAccount = "Basic " + Base64.encode((Sync.Config.Credentials.get("account-id") + ":" + Sync.Config.Credentials.get("application-key")).getBytes());
+            String headerForAuthorizeAccount = "Basic " + Base64.encodeBase64String((Sync.Config.Credentials.get("account-id") + ":" + Sync.Config.Credentials.get("application-key")).getBytes());
             try {
                 URL url = new URL("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
