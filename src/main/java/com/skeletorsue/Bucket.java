@@ -9,82 +9,83 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Bucket {
-	public String Name, Directory;
-	public Integer FileCount = 0;
-	public Integer CurrentIndex = 0;
-	public Integer ProcessCount = 0;
-	public Database DB;
-	public List<String> Files = new ArrayList<>();
 
-	public Bucket(String name, String directory) throws SQLException, IOException {
-		String message = "Scanning " + directory;
-		Integer line = Sync.ob.print(message);
-		this.Name = name;
-		this.Directory = directory;
+    public String Name, Directory;
+    public Integer FileCount = 0;
+    public Integer CurrentIndex = 0;
+    public Integer ProcessCount = 0;
+    public Database DB;
+    public List<String> Files = new ArrayList<>();
 
-		Stopwatch time = new Stopwatch();
-		CountFiles(this.Directory);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+    public Bucket(String name, String directory) throws SQLException, IOException {
+        String message = "Scanning " + directory;
+        Integer line = Sync.ob.print(message);
+        this.Name = name;
+        this.Directory = directory;
 
-		Sync.ob.print(message.length(), line, " -- Found " + this.FileCount + " files in " + time.RunTime(2) + " Seconds");
-		this.DB = new Database();
-		this.DB.conn_info.Driver = "sqlite";
-		this.DB.conn_info.DriverClass = "org.sqlite.JDBC";
-		this.DB.conn_info.Name = this.Directory + "/.b2-status.sq3";
+        Stopwatch time = new Stopwatch();
+        CountFiles(this.Directory);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-		if (!new File(this.DB.conn_info.Name).exists()) {
-			System.out.println("Creating the table");
-			this.DB.insert("CREATE TABLE IF NOT EXISTS sync_hashes( name_hash TEXT PRIMARY KEY NOT NULL, file_hash TEXT NOT NULL )");
-		}
-	}
+        Sync.ob.print(message.length(), line, " -- Found " + this.FileCount + " files in " + time.RunTime(2) + " Seconds");
+        this.DB = new Database();
+        this.DB.conn_info.Driver = "sqlite";
+        this.DB.conn_info.DriverClass = "org.sqlite.JDBC";
+        this.DB.conn_info.Name = this.Directory + "/.b2-status.sq3";
 
-	private void CountFiles(String Dir) {
-		File[] files = new File(Dir).listFiles();
+        if (!new File(this.DB.conn_info.Name).exists()) {
+            System.out.println("Creating the table");
+            this.DB.insert("CREATE TABLE IF NOT EXISTS sync_hashes( name_hash TEXT PRIMARY KEY NOT NULL, file_hash TEXT NOT NULL )");
+        }
+    }
 
-		if (files != null) {
-			for (File file : files) {
-				if (file.isDirectory()) {
-					CountFiles(file.getAbsolutePath());
-					continue;
-				}
-				Files.add(file.getAbsolutePath().substring(this.Directory.length() + 1));
-				this.FileCount++;
-			}
-		}
-	}
+    private void CountFiles(String Dir) {
+        File[] files = new File(Dir).listFiles();
 
-	public void Process(Integer BucketID) throws IOException, InterruptedException {
-		Integer startLine = Sync.ob.print("Processing: " + Directory);
-		B2.Authorize();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    CountFiles(file.getAbsolutePath());
+                    continue;
+                }
+                Files.add(file.getAbsolutePath().substring(this.Directory.length() + 1));
+                this.FileCount++;
+            }
+        }
+    }
 
-		for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
-			Thread t = new Thread(new Uploader(this.DB, BucketID));
-			t.setName("SYNC_" + t.getId());
-			t.start();
-		}
+    public void Process(Integer BucketID) throws IOException, InterruptedException {
+        Integer startLine = Sync.ob.print("Processing: " + Directory);
+        B2.Authorize();
 
-		int SyncThreads = 999;
-		while (SyncThreads > 0) {
-			SyncThreads = 0;
-			ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
-			int noThreads = currentGroup.activeCount();
-			Thread[] lstThreads = new Thread[noThreads];
-			currentGroup.enumerate(lstThreads);
-			for (int i = 0; i < noThreads; i++) {
-				if (lstThreads[i].getName().length() > 5 && Objects.equals(lstThreads[i].getName().substring(0, 5), "SYNC_"))
-					SyncThreads++;
-			}
+        for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
+            Thread t = new Thread(new Uploader(this.DB, BucketID));
+            t.setName("SYNC_" + t.getId());
+            t.start();
+        }
 
-			Thread.sleep(1000);
-		}
+        int SyncThreads = 999;
+        while (SyncThreads > 0) {
+            SyncThreads = 0;
+            ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
+            int noThreads = currentGroup.activeCount();
+            Thread[] lstThreads = new Thread[noThreads];
+            currentGroup.enumerate(lstThreads);
+            for (int i = 0; i < noThreads; i++) {
+                if (lstThreads[i].getName().length() > 5 && Objects.equals(lstThreads[i].getName().substring(0, 5), "SYNC_"))
+                    SyncThreads++;
+            }
 
-		Sync.ob.print(startLine, Directory + " finished processing " + ProcessCount + " of " + FileCount + " files");
+            Thread.sleep(1000);
+        }
 
-		Thread.sleep(4000);
-		Sync.ob.TrimScreen(startLine);
-	}
+        Sync.ob.print(startLine, Directory + " finished processing " + ProcessCount + " of " + FileCount + " files");
+
+        Thread.sleep(4000);
+        Sync.ob.TrimScreen(startLine);
+    }
 }
