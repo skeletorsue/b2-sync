@@ -11,13 +11,15 @@ public class Uploader implements Runnable {
     private Database db;
     private Integer OutputLine;
     private Integer BucketID;
-    private String Bucket;
+    private Bucket Bucket;
+    private B2 B2;
 
     public Uploader(Database db, Integer BucketID) throws IOException {
         this.db = db;
         OutputLine = Sync.ob.print("Thread Ready");
         this.BucketID = BucketID;
-        this.Bucket = Sync.Config.Buckets.get(BucketID).Name;
+        this.Bucket = Sync.Config.Buckets.get(BucketID);
+        this.B2 = new B2(this.Bucket);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class Uploader implements Runnable {
 
                 if (!Objects.equals(StoredHash, FileHash)) {
                     // doo the sync!
-					B2.Upload(FileObject, Sync.Config.Buckets.get(BucketID));
+					this.B2.Upload(FileObject, Sync.Config.Buckets.get(BucketID));
 
                     // insert into the db
                     String InsertStatement = "INSERT OR REPLACE INTO sync_hashes (name_hash, file_hash) VALUES (?, ?)";
@@ -57,7 +59,7 @@ public class Uploader implements Runnable {
 
                 Thread.sleep(ThreadLocalRandom.current().nextInt(10, 45)); // TODO remove this random sleep once we actually sync stuff
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
     }

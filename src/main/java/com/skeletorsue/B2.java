@@ -4,7 +4,6 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
-import javax.xml.ws.Response;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -15,24 +14,23 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 
 public class B2 {
-    private static String AuthorizationToken, ApiUrl;
-    private static JSONObject UploadAuth;
+    private JSONObject UploadAuth, Authorization;
+    private Bucket Bucket;
 
-    public static void Authorize() throws IOException {
-        GetToken();
+    public B2(Bucket Bucket) throws IOException {
+        this.Bucket = Bucket;
     }
 
-    public static void Upload(File file, Bucket Bucket) throws IOException, NoSuchAlgorithmException {
-        JSONObject UploadAuth = GetUploadURL(Bucket.Name);
+    public void Upload(File file, Bucket Bucket) throws IOException, NoSuchAlgorithmException {
         String File = file.getPath().substring(Bucket.Directory.length() + 1);
 
         byte fileData[] = Files.readAllBytes(Paths.get(file.getPath()));
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(UploadAuth.getString("uploadUrl"));
+            URL url = new URL(GetUploadAuth().getString("uploadUrl"));
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Authorization", UploadAuth.getString("authorizationToken"));
+            connection.setRequestProperty("Authorization", GetUploadAuth().getString("authorizationToken"));
             connection.setRequestProperty("Content-Type", "b2/x-auto");
             connection.setRequestProperty("X-Bz-File-Name", URLEncoder.encode(File, "UTF-8"));
             connection.setRequestProperty("X-Bz-Content-Sha1", Hash.File("SHA1", file));
@@ -42,7 +40,6 @@ public class B2 {
 
             InputStream in = new BufferedInputStream(connection.getInputStream());
             String RawResponse = IOUtils.toString(in);
-            JSONObject Response = new JSONObject(RawResponse);
             System.out.println("We've uploaded " + URLEncoder.encode(File, "UTF-8"));
 
         } catch (IOException ioe) {
@@ -55,19 +52,20 @@ public class B2 {
         }
     }
 
-    private static JSONObject GetUploadURL(String Bucket) throws IOException {
+    private JSONObject GetUploadAuth() throws IOException {
 
         if (UploadAuth == null) {
+            System.out.println("Getting another thing");
             HttpURLConnection connection = null;
-            String postParams = "{\"bucketId\":\"" + Bucket + "\"}";
+            String postParams = "{\"bucketId\":\"" + Bucket.Name + "\"}";
             byte postData[] = postParams.getBytes(StandardCharsets.UTF_8);
 
             try {
-                URL url = new URL(ApiUrl + "/b2api/v1/b2_get_upload_url");
+                URL url = new URL(GetAuthorization().getString("apiUrl") + "/b2api/v1/b2_get_upload_url");
 
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
-                connection.setRequestProperty("Authorization", AuthorizationToken);
+                connection.setRequestProperty("Authorization", GetAuthorization().getString("authorizationToken"));
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
@@ -91,12 +89,11 @@ public class B2 {
         return UploadAuth;
     }
 
-    private static String GetToken() throws IOException {
-        if (AuthorizationToken == null) {
+    private JSONObject GetAuthorization() throws IOException {
+        if (Authorization == null) {
             HttpURLConnection connection = null;
             String headerForAuthorizeAccount = "Basic " + Base64.encode((Sync.Config.Credentials.get("account-id") + ":" + Sync.Config.Credentials.get("application-key")).getBytes());
             try {
-                AuthorizationToken = "XXX";
                 URL url = new URL("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
                 connection = (HttpURLConnection) url.openConnection();
@@ -107,14 +104,13 @@ public class B2 {
                 String RawResponse = IOUtils.toString(in);
                 JSONObject Response = new JSONObject(RawResponse);
 
-                ApiUrl = Response.get("apiUrl").toString();
-                AuthorizationToken = Response.get("authorizationToken").toString();
+                Authorization = Response;
             } finally {
                 if (connection != null)
                     connection.disconnect();
             }
         }
 
-        return AuthorizationToken;
+        return Authorization;
     }
 }

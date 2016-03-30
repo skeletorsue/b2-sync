@@ -52,6 +52,11 @@ public class Bucket {
                     CountFiles(file.getAbsolutePath());
                     continue;
                 }
+
+                if (file.getName().equals(".b2-status.sq3")) {
+                    continue;
+                }
+
                 Files.add(file.getAbsolutePath().substring(this.Directory.length() + 1));
                 this.FileCount++;
             }
@@ -60,7 +65,6 @@ public class Bucket {
 
     public void Process(Integer BucketID) throws IOException, InterruptedException {
         Integer startLine = Sync.ob.print("Processing: " + Directory);
-        B2.Authorize();
 
         for (Integer i = 0; i < Sync.Config.NumThreads; i++) {
             Thread t = new Thread(new Uploader(this.DB, BucketID));
