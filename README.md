@@ -1,7 +1,7 @@
 # b2-sync
 
 *disclaimer* --
-This project is still in a very partial state. There really isn't any fully functional part of it at this point. It works for the most part, but it's by no means complete or without issue.
+This project is still in a very partial state. There really isn't any fully functional part of it at this point. It works for the most part, but it's by no means complete or without issue. (the code for this project is located in the make_everything branch to further show the current unfinished state of this project).
 
 ## What is this
 In short, it's a generic sync script to take any number of directories and upload everything in them to [backblaze](https://www.backblaze.com/) [b2 storage](https://www.backblaze.com/b2/cloud-storage.html) buckets.
